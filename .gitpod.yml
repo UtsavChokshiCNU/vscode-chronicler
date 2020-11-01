@@ -1,0 +1,6 @@
+image:
+  file: Dockerfile
+
+vscode:
+  extensions:
+    - dbaeumer.vscode-eslint@2.1.8:d3668785b2744386867631d79537552a
