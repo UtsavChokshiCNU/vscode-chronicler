@@ -11,6 +11,8 @@ import { Util } from './util';
 import { RecordingOptions } from './types';
 import { Config } from './config';
 
+import { multiStepInput, State, recordingTypes } from './multiStepInput';
+
 export async function activate(context: vscode.ExtensionContext) {
 
   Util.context = context;
@@ -52,7 +54,36 @@ export async function activate(context: vscode.ExtensionContext) {
     return true;
   }
 
-  async function record(opts: Partial<RecordingOptions> = {}) {
+  function ensureTerminalExists(): boolean {
+    if ((<any>vscode.window).terminals.length === 0) {
+      vscode.window.showErrorMessage('No active terminals');
+      return false;
+    }
+    return true;
+  }
+
+  async function record(opts: Partial<RecordingOptions> = {}, context: vscode.ExtensionContext) {
+
+    const state = await multiStepInput(context);
+    vscode.window.showInformationMessage(`Starting recording for '${state.recordingName}' with type '${state.recordingType.label}'`);
+
+    // If recording type is terminal then start one with script command
+    if (state.recordingType.label === recordingTypes[0].label){
+
+      if(!ensureTerminalExists()){
+        vscode.window.showInformationMessage("No terminal opened, opening new one !");
+        const terminal = vscode.window.createTerminal({
+          name: "Recording commands",
+          hideFromUser: false
+        } as any);
+        terminal.show();
+        terminal.sendText("script commands.txt");
+      }
+      else{
+        vscode.window.activeTerminal?.sendText("script commands.txt");
+      }
+    }
+
     try {
       if (!(await initRecording())) {
         return;
@@ -89,7 +120,7 @@ export async function activate(context: vscode.ExtensionContext) {
           if (e.session.role === vsls.Role.None) {
             stop();
           } else {
-            record();
+            record({},context);
           }
         });
       }
@@ -97,16 +128,16 @@ export async function activate(context: vscode.ExtensionContext) {
   }
 
   vscode.commands.registerCommand('chronicler.stop', stop);
-  vscode.commands.registerCommand('chronicler.record', () => record());
-  vscode.commands.registerCommand('chronicler.recordGif', () => record({ animatedGif: true }));
-  vscode.commands.registerCommand('chronicler.recordWithAudio', () => record({ audio: true }));
+  vscode.commands.registerCommand('chronicler.record', () => record({}, context));
+  vscode.commands.registerCommand('chronicler.recordGif', () => record({ animatedGif: true }, context));
+  vscode.commands.registerCommand('chronicler.recordWithAudio', () => record({ audio: true }, context));
   vscode.commands.registerCommand('chronicler.recordWithDuration', async () => {
     const time = await vscode.window.showInputBox({
       prompt: 'Duration of recording (time in seconds)',
       placeHolder: '120'
     });
     if (time) {
-      record({ duration: parseInt(time, 10) });
+      record({ duration: parseInt(time, 10) }, context);
     }
   });
 

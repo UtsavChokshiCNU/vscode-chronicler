@@ -113,9 +113,9 @@
     "test": "npm run compile && node ./node_modules/vscode/bin/test"
   },
   "devDependencies": {
+    "@types/node": "^10.12.19",
     "typescript": "^3.2.2",
-    "vscode": "^1.1.26",
-    "@types/node": "^10.12.19"
+    "vscode": "^1.1.26"
   },
   "dependencies": {
     "@arcsine/screen-recorder": "^0.1.6",
