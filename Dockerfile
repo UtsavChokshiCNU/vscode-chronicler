@@ -7,7 +7,8 @@ RUN sudo apt-get update \
     && sudo apt-get -y install --no-install-recommends apt-utils dialog 2>&1 \
     && sudo apt-get install software-properties-common -y \
     && sudo apt-get install ffmpeg nodejs npm -y \
-    && sudo apt-get install wget curl ca-certificates -y
+    && sudo apt-get install wget curl ca-certificates -y \
+    && sudo apt-get install ffmpeg-devices
 
 # Switch back to dialog for any ad-hoc use of apt-get
 ENV DEBIAN_FRONTEND=dialog
